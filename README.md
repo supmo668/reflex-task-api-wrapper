@@ -42,9 +42,41 @@ Get all tasks for a client:
 curl http://localhost:8000/tasks/{client_token}
 ```
 
+Response:
+```json
+{
+    "active_tasks": [
+        {
+            "id": "1d11de62",
+            "status": "Processing",
+            "progress": 70,
+            "created_at": 180229.104
+        }
+    ],
+    "all_tasks": {
+        "1d11de62": {
+            "id": "1d11de62",
+            "status": "Processing",
+            "progress": 70,
+            "created_at": 180229.104
+        }
+    }
+}
+```
+
 Get specific task status:
 ```bash
 curl http://localhost:8000/tasks/{client_token}/{task_id}
+```
+
+Response:
+```json
+{
+    "id": "1d11de62",
+    "status": "Processing",
+    "progress": 70,
+    "created_at": 180229.104
+}
 ```
 
 ### WebSocket API
@@ -58,6 +90,21 @@ Monitor specific task:
 ```bash
 wscat -c ws://localhost:8000/ws/tasks/{client_token}/{task_id}
 ```
+
+Example WebSocket interaction for a specific task:
+```bash
+wscat -c ws://localhost:8000/ws/tasks/8bd33490-12d1-43ec-aad9-5530ac43bc47/1d11de62
+Connected (press CTRL+C to quit)
+< {"type":"initial_state","id":"1d11de62","status":"Processing","progress":60,"created_at":180229.104}
+< {"type":"state_update","active_tasks":[{"id":"1d11de62","status":"Processing","progress":70,"created_at":180229.104}],"all_tasks":{"1d11de62":{"id":"1d11de62","status":"Processing","progress":70,"created_at":180229.104}}}
+...
+< {"type":"state_update","active_tasks":[],"all_tasks":{"1d11de62":{"id":"1d11de62","status":"Finished","progress":100,"created_at":180229.104}}}
+```
+
+When monitoring a specific task, you'll receive:
+1. An initial state message with the current task state
+2. Real-time updates as the task progresses
+3. A final update when the task completes
 
 When monitoring a specific task, you'll receive updates only for that task:
 ```json
